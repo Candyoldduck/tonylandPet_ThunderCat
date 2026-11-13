@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>雷霆喵 · 动态 2D 模型预览</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; height: 100vh; display: flex; font-family: "Microsoft YaHei", system-ui, sans-serif;
+    background: #141821; color: #e8ecf5; overflow: hidden;
+  }
+  #stage {
+    flex: 1; position: relative; display: flex; align-items: flex-end; justify-content: center;
+    background-image:
+      linear-gradient(45deg, #232936 25%, transparent 25%),
+      linear-gradient(-45deg, #232936 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #232936 75%),
+      linear-gradient(-45deg, transparent 75%, #232936 75%);
+    background-size: 32px 32px; background-position: 0 0, 0 16px, 16px -16px, -16px 0;
+  }
+  #stage.light { background: #f3f5fa; }
+  #stage.dark { background: #141821; }
+  canvas { width: 100%; height: 100%; display: block; }
+  #panel {
+    width: 300px; flex: none; padding: 20px; background: #1b2029; border-left: 1px solid #2b3342;
+    overflow-y: auto;
+  }
+  h1 { font-size: 16px; font-weight: 600; margin: 0 0 4px; }
+  .sub { font-size: 12px; color: #8b96a8; margin-bottom: 18px; line-height: 1.5; }
+  h2 { font-size: 12px; letter-spacing: .08em; color: #7f8b9e; margin: 18px 0 8px; font-weight: 600; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    font: inherit; font-size: 12px; padding: 7px 10px; border-radius: 7px; cursor: pointer;
+    border: 1px solid #33405a; background: #232b3a; color: #dfe6f2;
+  }
+  button:hover { background: #2c374b; }
+  label { display: block; font-size: 12px; color: #aab4c4; margin: 10px 0 4px; }
+  input[type=range] { width: 100%; accent-color: #7aa7ff; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; }
+  #status { position: absolute; left: 16px; top: 14px; font-size: 12px; color: #9aa5b6; }
+  #status.error { color: #ff7b7b; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="canvas"></canvas>
+  <div id="status">加载中…</div>
+</div>
+<aside id="panel">
+  <h1>雷霆喵 · 动态 2D 模型</h1>
+  <div class="sub">Mesh Avatar Studio 引擎 · 眨眼 / 呼吸 / 转头 / 发丝摆动<br>拖动下方滑块可直接调整姿态</div>
+
+  <h2>动作</h2>
+  <div class="row" id="motions"></div>
+
+  <h2>表情与姿态</h2>
+  <label>转头 <span data-out="angleX"></span></label>
+  <input type="range" data-param="angleX" min="-30" max="30" value="0">
+  <label>抬头 / 低头 <span data-out="angleY"></span></label>
+  <input type="range" data-param="angleY" min="-30" max="30" value="0">
+  <label>歪头 <span data-out="angleZ"></span></label>
+  <input type="range" data-param="angleZ" min="-30" max="30" value="0">
+  <label>睁眼 <span data-out="eyeOpen"></span></label>
+  <input type="range" data-param="eyeOpen" min="0" max="1.25" step="0.01" value="1">
+  <label>张嘴 <span data-out="mouthOpen"></span></label>
+  <input type="range" data-param="mouthOpen" min="0" max="1" step="0.01" value="0">
+  <label>腮红 <span data-out="blush"></span></label>
+  <input type="range" data-param="blush" min="0" max="1" step="0.01" value="0">
+
+  <h2>显示</h2>
+  <div class="row">
+    <button data-bg="checker">棋盘背景</button>
+    <button data-bg="light">浅色背景</button>
+    <button data-bg="dark">深色背景</button>
+  </div>
+  <div class="check">
+    <input type="checkbox" id="idle" checked>
+    <label for="idle" style="margin:0">自动待机动作与眨眼</label>
+  </div>
+</aside>
+
+<script type="module">
+import { createMeshAvatarImpl } from './src/engine/createMeshAvatar.js';
+import { PARAMS } from './src/engine/rig.js';
+
+const status = document.getElementById('status');
+const canvas = document.getElementById('canvas');
+const stage = document.getElementById('stage');
+const defaults = Object.fromEntries(PARAMS.map(p => [p.id, p.def]));
+const overrides = {};
+
+function setStatus(text, isError = false) {
+  status.textContent = text;
+  status.className = isError ? 'error' : '';
+}
+
+const [rig, avatar] = await (async () => {
+  try {
+    const rig = await (await fetch('./projects/leitingmiao/rig.json', { cache: 'no-store' })).json();
+    const avatar = await createMeshAvatarImpl(canvas, {
+      rig,
+      assetsBase: './projects/leitingmiao/built/',
+    });
+    const auto = new URLSearchParams(location.search).get('auto') !== '0';
+    avatar.setAutoIdle(auto);
+    avatar.setAutoMotion(auto);
+    avatar.setParameters({ ...defaults });
+    setStatus('');
+    return [rig, avatar];
+  } catch (error) {
+    setStatus('加载失败：' + (error?.message ?? error), true);
+    throw error;
+  }
+})();
+
+const motions = document.getElementById('motions');
+for (const motion of avatar.motions.filter(m => !m.idle)) {
+  const button = document.createElement('button');
+  button.textContent = motion.label;
+  button.addEventListener('click', () => avatar.play(motion.id));
+  motions.append(button);
+}
+const blink = document.createElement('button');
+blink.textContent = '眨眼';
+blink.addEventListener('click', () => {
+  const start = performance.now();
+  const step = now => {
+    const t = Math.min(1, (now - start) / 220);
+    const open = 1 - Math.sin(t * Math.PI);
+    apply({ eyeOpen: open });
+    if (t < 1) requestAnimationFrame(step);
+    else apply({ eyeOpen: 1 });
+  };
+  requestAnimationFrame(step);
+});
+motions.append(blink);
+
+function apply(changes = {}) {
+  Object.assign(overrides, changes);
+  avatar.setParameters({ ...defaults, ...overrides });
+  for (const [key, value] of Object.entries(changes)) {
+    const output = document.querySelector(`[data-out="${key}"]`);
+    if (output) output.textContent = Number(value).toFixed(2);
+  }
+}
+
+const sliderMap = { eyeOpen: 'eyeLOpen' };
+for (const input of document.querySelectorAll('input[data-param]')) {
+  const key = input.dataset.param;
+  input.addEventListener('input', () => {
+    const value = Number(input.value);
+    if (key === 'eyeOpen') apply({ eyeLOpen: value, eyeROpen: value });
+    else apply({ [key]: value });
+  });
+}
+
+document.getElementById('idle').addEventListener('change', event => {
+  avatar.setAutoIdle(event.target.checked);
+  avatar.setAutoMotion(event.target.checked);
+  if (!event.target.checked) avatar.setParameters({ ...defaults, ...overrides });
+});
+
+for (const button of document.querySelectorAll('[data-bg]')) {
+  button.addEventListener('click', () => {
+    stage.className = button.dataset.bg === 'checker' ? '' : button.dataset.bg;
+  });
+}
+
+const query = new URLSearchParams(location.search);
+const initial = {};
+for (const param of PARAMS) {
+  if (!query.has(param.id)) continue;
+  initial[param.id] = Number(query.get(param.id));
+  const input = document.querySelector(`input[data-param="${param.id}"]`);
+  if (input) input.value = String(initial[param.id]);
+  const output = document.querySelector(`[data-out="${param.id}"]`);
+  if (output) output.textContent = initial[param.id].toFixed(2);
+}
+if (query.has('eyeOpen')) {
+  initial.eyeLOpen = Number(query.get('eyeOpen'));
+  initial.eyeROpen = Number(query.get('eyeOpen'));
+  const input = document.querySelector('input[data-param="eyeOpen"]');
+  if (input) input.value = query.get('eyeOpen');
+  const output = document.querySelector('[data-out="eyeOpen"]');
+  if (output) output.textContent = Number(query.get('eyeOpen')).toFixed(2);
+}
+if (Object.keys(initial).length) {
+  Object.assign(overrides, initial);
+  avatar.setParameters({ ...defaults, ...overrides });
+}
+if (query.has('bg')) {
+  stage.className = query.get('bg') === 'checker' ? '' : query.get('bg');
+}
+if (query.has('motion')) {
+  avatar.play(query.get('motion'));
+}
+
+window.__avatar = avatar;
+</script>
+</body>
+</html>
