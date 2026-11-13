@@ -1,112 +1,91 @@
-# Mesh Avatar Studio
+###雷霆喵桌宠 · 使用说明
+------------------------------
+【安装】
+发给同学只要发一个文件：output\雷霆喵-setup.exe，双击安装，一路「下一步」就行。
+安装过程里有两个可选勾选：「创建桌面图标」和「开机自动启动」，默认都不勾，建议都勾上。
+装完后双击桌面的「雷霆喵」图标，或者在开始菜单里找「雷霆喵」。
 
-[日本語](README.ja.md)
+不想安装也可以：把 dist\雷霆喵 整个文件夹拷给对方，双击里面的 雷霆喵.exe 就能跑。
+（这个文件夹不能只拷 exe，里面的 web 和 libs 两个文件夹要一起带上。）
 
-Turn a single illustration into an animated 2D mesh avatar: it blinks, talks, turns its head,
-breathes and sways its hair. A coding agent prepares the avatar from your image; you fine-tune
-it in a local editor with a live preview.
+雷霆喵用的是系统自带的 Edge WebView2 来画图。Win11 和大多数 Win10 都有；
+安装程序如果发现没有，会弹一句提示，去微软官网装一下 WebView2 运行时就好。
 
-![The editor with the Miko sample](docs/images/en/01-overview.png)
+卸载：设置 → 应用 → 已安装的应用 → 「雷霆喵」，或者开始菜单里的「雷霆喵 → 卸载」。
+卸载只删程序本身，它记住的位置、大小、开关会留在电脑上，重装后还是原来的样子。
 
-## Try the sample
+【启动】
+第一次启动会先出现“雷霆喵正在醒来…”的加载画面，大约 2～4 秒后，
+雷霆喵会站在屏幕右下角。不会留下黑色命令行窗口。
+重复双击不会开出第二只，它会提示“雷霆喵已经在桌面上啦”。
 
-Requires Node.js 22.17+.
+【互动】
+· 按住左键拖动：把雷霆喵搬到任意位置（位置会自动记住）
+  按住的那一刻它先屈膝往下沉一下，等窗口被拎起来才收腿抬脚，头发和裙摆往下坠，
+  同时会「喵？」一声；被拎着不动超过两秒，它会开始扭来扭去、自己做点小动作；
+  松手后它不会再停在原地：手那一刻的甩速会变成它自己的速度，带着惯性继续飞一段，
+  悬在半空就往下掉，落到桌面底部那条线（任务栏上沿）会弹两下、越弹越小、然后屈膝站稳；
+  撞到屏幕左右边缘也会反弹回来；轻轻放下就只是往下坠一点点，不会乱飞
+· 落地分轻重：慢慢放下只是膝盖一软，从高处摔下来会深深蹲一下、胳膊往前撑、
+  眼睛瞪大张着小嘴，随后还会晃两下才站稳，越重喊得越响
+· 撞墙不是落地：撞到左右边缘它不会蹲，而是整个身子往撞的方向歪一下、
+  胳膊乱挥两下、赶紧抬脚稳住，运气好还会「唔！」一声
+· 单击：它会说话、做个小动作
+· 双击：摸摸头
+· 右键：打开菜单
+· 鼠标滚轮：在猫咪身上滚动，可以随时放大 / 缩小（指针要落在猫身上，
+  窗口四角和头顶那块空白是透明的，滚了没反应）
 
-```sh
-npm install
-npm run dev
-```
+【右键菜单】
+· 最上面的服务器状态：tonyland 启动器开着时会显示“已连接 / 在线 N 人”，
+  点一下可以看在线名单
+· 上方的动作按钮：点头、歪头、打招呼、偷笑、害羞、眨眼、思考、惊讶、踢踢腿、跺跺脚、随机
+  （打招呼会抬起小臂真的挥两下手，踢腿和跺脚用的是大腿＋小腿两根骨头，膝盖只往一个方向弯）
+· 眼神跟随：眼睛和脑袋会跟着鼠标转（可以关掉）
+· 自动待机：待机时的呼吸、眨眼、小动作、猫耳偶尔轻颤（可以关掉）
+· 自动走动：每隔十几秒在桌面上左右走几步，双腿会轮流抬起、屈膝、落脚，
+  手和身体跟着起伏（可以关掉；走路时点它或拖动它会立刻停下）
+· 窗口置顶：让它一直显示在最上面（可以关掉）
+· 小 / 中 / 大：快速切换大小；想更精细就用滚轮
+· 服务器公告：重看最近一条服务器公告
+· 去睡觉：闭眼打盹；再点一次或单击它就醒了
+· 回到右下角：位置乱了就用这个
+· 退出桌宠：关闭程序
+· 菜单比窗口高时，把鼠标放到菜单上滚轮滚动即可往下看
 
-Open the URL printed in the terminal (for example `http://127.0.0.1:5173/`). The editor opens
-the bundled sample, Miko in a qipao. Pick a part on the left, drag its dots on the image and
-watch the preview on the right. The sample is read-only; when you change it, choose
-**Copy and keep editing** to continue in your own copy.
+【tonyland 服务器联动】
+· 同学的 tonyland 启动器开着时，雷霆喵会自动连上（只连本机 127.0.0.1，不联网）
+· 游戏里有人死亡、拿到成就、挖到第一颗钻石、有人上下线、发公告或情绪时，
+  雷霆喵会冒气泡、做相应表情；重要的公告会显示更久
+· 整合包或资源包更新时也会提醒一句
+· 启动器没开、或者中途关掉时，雷霆喵会安静地自己待机：不弹窗、不报错，
+  过 30 秒自己再试一次；重新连上后会重新同步在线状态
 
-### Using Windows
+【小提示】
+· 位置、大小和各个开关都会自动保存，下次启动还在原处。
+· 转头、歪头、抬头低头时只有头和脖子在动，衣服、领结和裙摆保持原样，
+  不会再跟着头部一起扭曲变形。
+· 待机时猫耳会偶尔轻轻颤一下（有时单耳、有时双耳、有时连颤两下），
+  属于自动待机的一部分；关掉自动待机就不颤。
+· 它现在受重力：在半空中松手，它会掉到底部那条线（任务栏上沿）并弹两下站稳；
+  想让它待在某个高度，就贴着那条线、慢慢放手。
+· 拖动和飞行都限制在当前显示器里，甩不出去，也不会跑到任务栏下面。
+· 自动走动只在当前显示器里左右移动，走到屏幕边缘会自己换方向。
+· 独占全屏的游戏（比如原神全屏模式）会把所有桌面窗口盖住，
+  切回桌面（Alt+Tab）就能看到雷霆喵。
+· 只有猫咪身体（包括腿和鞋）会挡住鼠标，透明的地方可以直接点到底下的窗口。
+· 不要同时开两个，重复双击会提示“雷霆喵已经在桌面上啦”。
+· 立绘里手臂后面画的是什么并没有画出来，所以把手抬得很高时，原来被手臂挡住的那一小块
+  裙子会显得比周围略浅一点。正常大小下几乎看不出来，把窗口调到「小」基本注意不到。
 
-Use `git clone` to download the repository when possible. If you use a ZIP, open its
-Properties in File Explorer and select **Unblock**, if shown, before extracting it.
+【文件说明】
+· output\雷霆喵-setup.exe —— 安装包，发给同学就发这一个
+· dist\雷霆喵\ —— 免安装的绿色版文件夹，双击里面的 雷霆喵.exe
+· 启动桌宠.bat —— 用源码直接跑（需要电脑上装过 Python，一般用不到）
+· desktop-pet\ —— 桌宠程序源码
+· projects\leitingmiao\ —— 雷霆喵的模型和图片
+· tools\build-exe.ps1 —— 重新打包 exe 的脚本；tools\installer.iss —— 打包安装包的脚本
+· 启动预览.bat / viewer.html —— 单独的模型预览页（可选）
 
-Create `projects/` yourself under your Windows account before asking an agent to work in it.
-Folders created by another account or an agent running in a sandbox can have permissions
-that prevent the editor from reading them. If a project cannot be read, use the folder's
-**Properties → Security** settings to grant your account access to the whole project,
-including its files and subfolders through permission inheritance.
-
-## How it works
-
-Making an avatar from your own illustration takes four steps. Steps 1 and 4 are done by a
-coding agent (Claude Code or Codex) working in this repository; steps 2 and 3 happen in the
-editor.
-
-### 1. Ask your agent to create the avatar
-
-Open Claude Code or Codex in this repository folder and give it your illustration:
-
-> Create an avatar from this image following docs/agent-guide.md: `/path/to/your-image.png`
-
-The agent follows [the agent guide](docs/agent-guide.md): it checks how accurately it reads
-coordinates, places the rig on zoomed grids, cuts the image into layers and reviews the
-avatar in fixed poses. The project is saved in `projects/<name>/`, which is never committed.
-Best results come from a front-facing, head-and-shoulders PNG with a transparent background.
-When no project is open, the editor shows this request ready to copy.
-
-![The request for a new avatar](docs/images/en/06-new-project.png)
-
-Recommended setups:
-
-| Agent | Model |
-|---|---|
-| Claude Code | Claude Opus 5.5 |
-| Codex | GPT-6.1 Sol |
-
-### 2. Open the project and check it
-
-Start the editor (`npm run dev`), choose **Open project** and pick your project from the list.
-In the preview, use **Pose test** to turn and tilt the head and close the eyes, and
-**Lip sync** to check the vowel mouth shapes.
-
-![Lip sync check](docs/images/en/03-lip-sync.png)
-
-### 3. Fix what looks wrong by dragging
-
-Select a part on the left. Its dots are highlighted on the image; drag them to fix the
-placement. The preview follows your changes immediately. Some values also decide how the image
-is cut into layers: eye and hand outlines, and the head, hair and bun areas used for the hair
-mask. After changing those, a banner appears; choose **Save and rebuild layers** there. It takes
-a few seconds.
-
-![Editing the eye outline](docs/images/en/02-edit-handles.png)
-
-![Rebuilding layers after changing an outline](docs/images/en/04-rebuild.png)
-
-Zoom with a pinch or Ctrl/Cmd+scroll, pan with two fingers or by dragging empty space, and use
-**Fit selected part** to jump to the current part.
-
-### 4. Get drawn eyes and mouths
-
-Without drawings, the eyes and mouth move by mesh deformation alone. Drawn closed eyes and
-vowel mouths make blinking and talking look much more natural. In **Drawn variants**, check
-**Eyes**, **Mouth** or both, copy the message and paste it into Codex opened in this
-repository folder. Codex draws them with its built-in image generation and imports them; the
-editor reloads them automatically. (Claude Code cannot generate images; its message prepares
-the masks and prompts for you to hand to an image generator.)
-
-![Requesting drawn mouths](docs/images/en/05-variants.png)
-
-## More
-
-- [Agent guide](docs/agent-guide.md): the step-by-step procedure agents follow
-- [Reference](docs/reference.md): projects, building layers by hand, all editor controls, tests
-- [Rig fields](docs/rig-fields.md): what every value in `rig.json` means
-
-## License
-
-The code is released under the [MIT License](LICENSE).
-
-The sample character Miko (`samples/miko-qipao/`) is not covered by the MIT License. Miko is the
-character of AITuber OnAir, © Yuki Shindo (AITuber OnAir), and her images are provided under the
-[Miko Character Usage Guidelines](https://miko.aituberonair.com/#terms); see
-[samples/miko-qipao/MIKO_ASSET_TERMS.md](samples/miko-qipao/MIKO_ASSET_TERMS.md). They may be used
-and modified as part of your own works, but not redistributed on their own or as an asset
-collection. This project is not an official AITuber OnAir product.
+如果桌宠没有出现，请再双击一次；仍不行就告诉我，我看日志排查
+（日志在 %APPDATA%\LeitingMiao\pet.log）。
